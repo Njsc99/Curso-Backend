@@ -1,6 +1,9 @@
 const path = require('path');
 
-module.exports = {
-    PORT: 8080,
-    getFilePath: (fileName) => path.join(__dirname, `../data/${fileName}`)
+const paths = {
+  views: path.join(__dirname, '../views'),
+  public: path.join(__dirname, '../../public')
 };
+
+module.exports = { paths };
+

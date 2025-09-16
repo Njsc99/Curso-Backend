@@ -1,9 +1,10 @@
 const express = require('express');
 const app = express();
-const port = 8080;
+
+const multer = require('multer'); // <-- Agrega esta línea
 
 const handlebars = require('express-handlebars');
-const path = require('path');
+const { paths } = require("./config/config");
 
 const productsRouter = require('./routes/products');
 const cartsRouter = require('./routes/carts');
@@ -14,15 +15,26 @@ app.engine('hbs', handlebars.engine({
   defaultLayout: 'main',
 }));
 app.set('view engine', 'hbs');
-
-const paths = {
-  views: path.join(__dirname, 'views')
-};
 app.set('views', paths.views);
 
 // MIDDLEWARES
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Servir archivos estáticos desde la carpeta "public"
+app.use(express.static(paths.public));
+
+// Config Multer
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+const upload = multer({ storage: storage });
 
 // RUTAS
 app.use('/api/products', productsRouter);
@@ -30,10 +42,7 @@ app.use('/api/carts', cartsRouter);
 
 // RUTA RAIZ
 app.get('/', (req, res) => {
-  res.status(200).send('Hello World!');
+  return res.render("pages/home", {});
 });
 
-// INICIO DEL SERVIDOR
-app.listen(port, () => {
-  console.log(`Servidor escuchando en http://localhost:${port}`);
-});
+module.exports = app;
