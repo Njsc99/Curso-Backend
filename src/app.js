@@ -2,7 +2,7 @@
 const express = require('express');
 const app = express();
 
-const multer = require('multer'); // <-- Agrega esta línea
+const multer = require('multer'); 
 
 const handlebars = require('express-handlebars');
 const { paths } = require("./config/config");
@@ -38,9 +38,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-
-
-
 // Socket.io
 const http = require('http');
 const httpServer = http.createServer(app);
@@ -54,6 +51,7 @@ io.on('connection', (socket) => {
   });
 });
 app.set('socketio', io);
+
 // RUTAS
 app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
