@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 
@@ -8,6 +9,7 @@ const { paths } = require("./config/config");
 
 const productsRouter = require('./routes/products');
 const cartsRouter = require('./routes/carts');
+const viewsRouter = require('./routes/views.router');
 
 // SETEO DE HANDLEBARS
 app.engine('hbs', handlebars.engine({
@@ -36,7 +38,24 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
+
+
+
+// Socket.io
+const http = require('http');
+const httpServer = http.createServer(app);
+
+const io = require('socket.io')(httpServer);
+
+io.on('connection', (socket) => {
+  console.log(`Nuevo cliente ${socket.id} conectado`);
+  socket.on('disconnect', () => {
+    console.log('Cliente desconectado');
+  });
+});
+app.set('socketio', io);
 // RUTAS
+app.use('/', viewsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/carts', cartsRouter);
 
@@ -45,4 +64,4 @@ app.get('/', (req, res) => {
   return res.render("pages/home", {});
 });
 
-module.exports = app;
+module.exports = { app, httpServer };

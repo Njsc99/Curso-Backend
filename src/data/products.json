@@ -11,76 +11,17 @@
       "img/mouse1.jpg",
       "img/mouse2.jpg"
     ],
-    "id": "5fa65805-e543-4afc-9682-602e36515a22"
-  },
-  {
-    "title": "Mouse inalámbrico",
-    "description": "Mouse óptico inalámbrico con batería recargable",
-    "code": "MOUSE123",
-    "price": 1500,
-    "status": true,
-    "stock": 25,
-    "category": "accesorios",
-    "thumbnails": [
-      "img/mouse1.jpg",
-      "img/mouse2.jpg"
-    ],
-    "id": "0cc5cfe3-19fe-460a-8bef-73ecbf87c9e7"
-  },
-  {
-    "title": "Mouse inalámbrico",
-    "description": "Mouse óptico inalámbrico con batería recargable",
-    "code": "MOUSE123",
-    "price": 1500,
-    "status": true,
-    "stock": 25,
-    "category": "accesorios",
-    "thumbnails": [
-      "img/mouse1.jpg",
-      "img/mouse2.jpg"
-    ],
     "id": "7c055786-2de7-4b5b-8ea7-4e373e295621"
   },
   {
-    "title": "Mouse inalámbrico",
-    "description": "Mouse óptico inalámbrico con batería recargable",
-    "code": "MOUSE123",
-    "price": 1500,
+    "title": "Mouse USB",
+    "description": "Mouse con cable USB",
+    "code": "2129",
+    "price": 13000,
     "status": true,
-    "stock": 25,
-    "category": "accesorios",
-    "thumbnails": [
-      "img/mouse1.jpg",
-      "img/mouse2.jpg"
-    ],
-    "id": "6bc42280-64a9-477c-97bd-34c1d5a30402"
-  },
-  {
-    "title": "Mouse inalámbrico",
-    "description": "Mouse óptico inalámbrico con batería recargable",
-    "code": "MOUSE123",
-    "price": 1500,
-    "status": true,
-    "stock": 25,
-    "category": "accesorios",
-    "thumbnails": [
-      "img/mouse1.jpg",
-      "img/mouse2.jpg"
-    ],
-    "id": "7d20e18b-e5b4-4c67-8d59-5ab44f269874"
-  },
-  {
-    "title": "Mouse inalámbrico",
-    "description": "Mouse óptico inalámbrico con batería recargable",
-    "code": "MOUSE123",
-    "price": 1500,
-    "status": true,
-    "stock": 25,
-    "category": "accesorios",
-    "thumbnails": [
-      "img/mouse1.jpg",
-      "img/mouse2.jpg"
-    ],
-    "id": "c540eda5-b71b-41ce-aaed-7e4691e8a4c9"
+    "stock": 6,
+    "category": "Periferico",
+    "thumbnails": [],
+    "id": "a63dccbe-c6f1-49a0-8dbb-834fea3b28c5"
   }
 ]

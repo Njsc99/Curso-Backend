@@ -36,6 +36,12 @@ async function createProduct(req, res) {
       category,
       thumbnails: thumbnails || []
     });
+    // Emitir actualización de productos por websocket
+    const io = req.app.get('socketio');
+    if (io) {
+      const productosActualizados = await productManager.getAll();
+      io.emit('productsUpdated', productosActualizados);
+    }
     res.status(201).json(newProduct);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -57,6 +63,12 @@ async function deleteProduct(req, res) {
   try {
     const deleted = await productManager.delete(req.params.pid);
     if (!deleted) return res.status(404).json({ error: 'Producto no encontrado' });
+    // Emitir actualización de productos por websocket
+    const io = req.app.get('socketio');
+    if (io) {
+      const productosActualizados = await productManager.getAll();
+      io.emit('productsUpdated', productosActualizados);
+    }
     res.json(deleted);
   } catch (error) {
     res.status(500).json({ error: error.message });

@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 class ProductManager {
   constructor(filename = 'products.json') {
-    this.file = path.join(__dirname, '..', '..', 'products.json');
+    this.file = path.join(__dirname, '..', 'data', 'products.json');
   }
 
   async getAll() {
