@@ -15,7 +15,6 @@ class DatabaseConnection {
       this.connection = await mongoose.connect(mongodb.uri);
       console.log('Conectado exitosamente a MongoDB Atlas');
       
-      // Eventos de conexión
       mongoose.connection.on('error', (err) => {
         console.error('ERROR: Error de conexión con MongoDB:', err);
       });

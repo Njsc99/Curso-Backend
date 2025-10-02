@@ -22,27 +22,21 @@ function renderProducts(products) {
   });
 }
 
-// Escuchar actualizaciones de productos
 socket.on('productsUpdated', (products) => {
   renderProducts(products);
 });
 
-// Escuchar confirmación de creación de producto
 socket.on('productCreated', (product) => {
   showMessage('Producto creado exitosamente', 'success');
 });
 
-// Escuchar confirmación de eliminación de producto
 socket.on('productDeleted', (product) => {
   showMessage('Producto eliminado exitosamente', 'success');
 });
 
-// Escuchar errores
 socket.on('productError', (error) => {
   showMessage('Error: ' + error.error, 'error');
 });
-
-// Función para mostrar mensajes al usuario
 function showMessage(message, type) {
   const messageDiv = document.createElement('div');
   messageDiv.textContent = message;
@@ -65,7 +59,6 @@ function showMessage(message, type) {
   }, 3000);
 }
 
-// Manejar el formulario de creación de productos usando WebSocket
 document.getElementById('add-product-form').addEventListener('submit', (e) => {
   e.preventDefault();
   const form = e.target;
@@ -81,19 +74,16 @@ document.getElementById('add-product-form').addEventListener('submit', (e) => {
     thumbnails: []
   };
   
-  // Emitir evento para crear producto por socket
   socket.emit('createProduct', product);
   form.reset();
 });
 
-// Función para eliminar producto usando WebSocket
 window.deleteProduct = function(id) {
   if (confirm('¿Estás seguro de que quieres eliminar este producto?')) {
     socket.emit('deleteProduct', id);
   }
 };
 
-// Escuchar cuando se desconecta del socket
 socket.on('disconnect', () => {
   showMessage('Conexión perdida con el servidor', 'error');
 });
