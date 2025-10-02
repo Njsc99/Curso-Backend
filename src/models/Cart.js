@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 
-// Schema para los productos dentro del carrito
 const cartProductSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
@@ -17,7 +16,6 @@ const cartProductSchema = new mongoose.Schema({
   _id: false // No generar _id para subdocumentos
 });
 
-// Schema principal del carrito
 const cartSchema = new mongoose.Schema({
   products: {
     type: [cartProductSchema],

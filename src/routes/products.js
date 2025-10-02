@@ -8,7 +8,6 @@ const {
   deleteProduct
 } = require('../controllers/product.controller');
 
-// Rutas limpias, solo referencia a los controladores
 router.get('/', getAllProducts);
 router.get('/:pid', getProductById);
 router.post('/', createProduct);

@@ -55,7 +55,6 @@ productSchema.index({ category: 1 });
 productSchema.index({ status: 1 });
 productSchema.index({ price: 1 });
 
-// Middleware pre-save para formatear el código
 productSchema.pre('save', function(next) {
   if (this.code) {
     this.code = this.code.toUpperCase().trim();
@@ -63,7 +62,6 @@ productSchema.pre('save', function(next) {
   next();
 });
 
-// Método para obtener un resumen del producto
 productSchema.methods.getSummary = function() {
   return {
     id: this._id,
@@ -75,17 +73,14 @@ productSchema.methods.getSummary = function() {
   };
 };
 
-// Método estático para buscar productos activos
 productSchema.statics.findActive = function() {
   return this.find({ status: true });
 };
 
-// Método estático para buscar por categoría
 productSchema.statics.findByCategory = function(category) {
   return this.find({ category: new RegExp(category, 'i') });
 };
 
-// Agregar plugin de paginación
 productSchema.plugin(mongoosePaginate);
 
 const Product = mongoose.model('Product', productSchema);

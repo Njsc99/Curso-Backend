@@ -1,7 +1,6 @@
 const CartManager = require('../managers/CartManager');
 const cartManager = new CartManager();
 
-// POST / - Crear un nuevo carrito
 async function createCart(req, res) {
   try {
     const newCart = await cartManager.create();
@@ -19,7 +18,6 @@ async function createCart(req, res) {
   }
 }
 
-// GET /:cid - Obtener carrito por ID con productos completos (populate)
 async function getCartById(req, res) {
   try {
     const cart = await cartManager.getById(req.params.cid);
@@ -43,13 +41,10 @@ async function getCartById(req, res) {
   }
 }
 
-// POST /:cid/product/:pid - Agregar producto al carrito
 async function addProductToCart(req, res) {
   try {
     const { cid, pid } = req.params;
     const { quantity = 1 } = req.body;
-
-    // Validar cantidad
     if (quantity < 1) {
       return res.status(400).json({ 
         status: 'error', 
@@ -81,7 +76,6 @@ async function addProductToCart(req, res) {
   }
 }
 
-// DELETE /:cid/products/:pid - Eliminar producto específico del carrito
 async function removeProductFromCart(req, res) {
   try {
     const { cid, pid } = req.params;
@@ -107,7 +101,6 @@ async function removeProductFromCart(req, res) {
   }
 }
 
-// PUT /:cid - Actualizar todo el carrito con un array de productos
 async function updateCart(req, res) {
   try {
     const { cid } = req.params;
@@ -162,7 +155,6 @@ async function updateCart(req, res) {
   }
 }
 
-// PUT /:cid/products/:pid - Actualizar cantidad de un producto específico
 async function updateProductQuantity(req, res) {
   try {
     const { cid, pid } = req.params;
@@ -200,7 +192,6 @@ async function updateProductQuantity(req, res) {
   }
 }
 
-// DELETE /:cid - Eliminar todos los productos del carrito
 async function clearCart(req, res) {
   try {
     const { cid } = req.params;

@@ -1,17 +1,13 @@
-<!-- Navegación principal -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
   <div class="container-fluid">
-    <!-- Brand -->
     <a class="navbar-brand fw-bold" href="/">
       <i class="bi bi-shop"></i> E-Commerce
     </a>
     
-    <!-- Botón para móviles -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
     
-    <!-- Enlaces de navegación -->
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
@@ -31,9 +27,7 @@
         </li>
       </ul>
       
-      <!-- Herramientas del lado derecho -->
       <div class="d-flex align-items-center">
-        <!-- Buscador rápido -->
         <form class="d-flex me-3" action="/products" method="GET">
           <div class="input-group">
             <input class="form-control form-control-sm" 
@@ -47,7 +41,6 @@
           </div>
         </form>
         
-        <!-- Acceso a carrito -->
         <div class="btn-group me-2">
           <button type="button" 
                   class="btn btn-outline-light btn-sm dropdown-toggle" 
@@ -87,7 +80,6 @@
 </nav>
 
 <script>
-// Manejar acceso a carrito
 document.addEventListener('DOMContentLoaded', function() {
   const cartForm = document.getElementById('cartAccessForm');
   if (cartForm) {
@@ -103,7 +95,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// Crear nuevo carrito
 async function createNewCart() {
   try {
     const response = await fetch('/api/carts', {

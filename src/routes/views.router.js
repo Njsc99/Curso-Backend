@@ -7,10 +7,8 @@ const router = express.Router();
 const productManager = new ProductManager();
 const cartManager = new CartManager();
 
-// Ruta principal (home) - mostrar catálogo con paginación
 router.get('/', async (req, res) => {
   try {
-    // Obtener parámetros de query con valores por defecto para el home
     const limit = parseInt(req.query.limit) || 12; // Mostrar más productos en home
     const page = parseInt(req.query.page) || 1;
     const sort = req.query.sort;
@@ -79,7 +77,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Ruta de productos en tiempo real (WebSockets)
 router.get('/realtimeproducts', async (req, res) => {
   try {
     const result = await productManager.getAll({ limit: 50 }); // Obtener más productos para tiempo real
