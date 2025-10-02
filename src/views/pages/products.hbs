@@ -1,0 +1,417 @@
+{{#if error}}
+<div class="alert alert-danger" role="alert">
+  {{error}}
+</div>
+{{/if}}
+
+<div class="container-fluid mt-4">
+  <!-- Encabezado -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-4">Catálogo de Productos</h1>
+      <p class="lead">Explora nuestra amplia selección de productos</p>
+    </div>
+  </div>
+
+  <!-- Filtros y búsqueda -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Filtros de búsqueda</h5>
+          <form id="filterForm" method="GET" action="/products">
+            <div class="row">
+              <!-- Búsqueda general -->
+              <div class="col-md-3 mb-3">
+                <label for="query" class="form-label">Buscar:</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="query" 
+                       name="query" 
+                       placeholder="Título, descripción..."
+                       value="{{filters.query}}">
+              </div>
+              
+              <!-- Categoría -->
+              <div class="col-md-2 mb-3">
+                <label for="category" class="form-label">Categoría:</label>
+                <input type="text" 
+                       class="form-control" 
+                       id="category" 
+                       name="category" 
+                       placeholder="Categoría"
+                       value="{{filters.category}}">
+              </div>
+              
+              <!-- Estado -->
+              <div class="col-md-2 mb-3">
+                <label for="status" class="form-label">Estado:</label>
+                <select class="form-select" id="status" name="status">
+                  <option value="">Todos</option>
+                  <option value="true" {{#if (eq filters.status 'true')}}selected{{/if}}>Activos</option>
+                  <option value="false" {{#if (eq filters.status 'false')}}selected{{/if}}>Inactivos</option>
+                </select>
+              </div>
+              
+              <!-- Ordenar por precio -->
+              <div class="col-md-2 mb-3">
+                <label for="sort" class="form-label">Ordenar por precio:</label>
+                <select class="form-select" id="sort" name="sort">
+                  <option value="">Sin orden</option>
+                  <option value="asc" {{#if (eq filters.sort 'asc')}}selected{{/if}}>Menor a mayor</option>
+                  <option value="desc" {{#if (eq filters.sort 'desc')}}selected{{/if}}>Mayor a menor</option>
+                </select>
+              </div>
+              
+              <!-- Cantidad por página -->
+              <div class="col-md-2 mb-3">
+                <label for="limit" class="form-label">Por página:</label>
+                <select class="form-select" id="limit" name="limit">
+                  <option value="5" {{#if (eq pagination.limit 5)}}selected{{/if}}>5</option>
+                  <option value="10" {{#if (eq pagination.limit 10)}}selected{{/if}}>10</option>
+                  <option value="20" {{#if (eq pagination.limit 20)}}selected{{/if}}>20</option>
+                </select>
+              </div>
+              
+              <!-- Botones -->
+              <div class="col-md-1 mb-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                  <i class="bi bi-search"></i> Buscar
+                </button>
+              </div>
+            </div>
+          </form>
+          
+          <!-- Limpiar filtros -->
+          <div class="mt-2">
+            <a href="/products" class="btn btn-outline-secondary btn-sm">
+              <i class="bi bi-x-circle"></i> Limpiar filtros
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Información de resultados -->
+  {{#if pagination}}
+  <div class="row mb-3">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center">
+        <span class="text-muted">
+          Mostrando {{products.length}} de {{pagination.totalDocs}} productos 
+          (Página {{pagination.page}} de {{pagination.totalPages}})
+        </span>
+        
+        <!-- Paginación superior -->
+        {{#if (gt pagination.totalPages 1)}}
+        <nav aria-label="Navegación de productos">
+          <ul class="pagination pagination-sm mb-0">
+            {{#if pagination.hasPrevPage}}
+              <li class="page-item">
+                <a class="page-link" href="{{pagination.prevLink}}">Anterior</a>
+              </li>
+            {{else}}
+              <li class="page-item disabled">
+                <span class="page-link">Anterior</span>
+              </li>
+            {{/if}}
+            
+            <li class="page-item active">
+              <span class="page-link">{{pagination.page}}</span>
+            </li>
+            
+            {{#if pagination.hasNextPage}}
+              <li class="page-item">
+                <a class="page-link" href="{{pagination.nextLink}}">Siguiente</a>
+              </li>
+            {{else}}
+              <li class="page-item disabled">
+                <span class="page-link">Siguiente</span>
+              </li>
+            {{/if}}
+          </ul>
+        </nav>
+        {{/if}}
+      </div>
+    </div>
+  </div>
+  {{/if}}
+
+  <!-- Lista de productos -->
+  <div class="row">
+    {{#if products.length}}
+      {{#each products}}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+          {{#if (hasItems thumbnails)}}
+          <img src="{{first thumbnails}}" class="card-img-top" alt="{{title}}" style="height: 200px; object-fit: cover;">
+          {{else}}
+          <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+            <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+          </div>
+          {{/if}}
+          
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{title}}</h5>
+            <p class="card-text text-muted small mb-2">{{category}}</p>
+            <p class="card-text flex-grow-1">{{description}}</p>
+            
+            <div class="mt-auto">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                  <span class="h4 text-primary mb-0">${{price}}</span>
+                  <small class="text-muted d-block">Stock: {{stock}}</small>
+                </div>
+                <div>
+                  {{#if status}}
+                    <span class="badge bg-success">Disponible</span>
+                  {{else}}
+                    <span class="badge bg-danger">No disponible</span>
+                  {{/if}}
+                </div>
+              </div>
+              
+              <div class="d-grid gap-2">
+                <a href="/products/{{id}}" class="btn btn-outline-primary btn-sm">
+                  <i class="bi bi-eye"></i> Ver detalles
+                </a>
+                
+                {{#if status}}
+                  {{#if (gt stock 0)}}
+                  <div class="input-group input-group-sm">
+                    <input type="number" 
+                           class="form-control quantity-input" 
+                           value="1" 
+                           min="1" 
+                           max="{{stock}}"
+                           data-product-id="{{id}}">
+                    <button class="btn btn-success add-to-cart-btn" 
+                            data-product-id="{{id}}"
+                            data-product-title="{{title}}">
+                      <i class="bi bi-cart-plus"></i> Agregar
+                    </button>
+                  </div>
+                  {{else}}
+                  <button class="btn btn-secondary btn-sm" disabled>
+                    <i class="bi bi-x-circle"></i> Sin stock
+                  </button>
+                  {{/if}}
+                {{else}}
+                <button class="btn btn-secondary btn-sm" disabled>
+                  <i class="bi bi-x-circle"></i> No disponible
+                </button>
+                {{/if}}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {{/each}}
+    {{else}}
+      <div class="col-12">
+        <div class="text-center py-5">
+          <i class="bi bi-search text-muted" style="font-size: 4rem;"></i>
+          <h3 class="mt-3 text-muted">No se encontraron productos</h3>
+          <p class="text-muted">Intenta ajustar tus filtros de búsqueda</p>
+          <a href="/products" class="btn btn-primary">Ver todos los productos</a>
+        </div>
+      </div>
+    {{/if}}
+  </div>
+
+  <!-- Paginación inferior -->
+  {{#if (gt pagination.totalPages 1)}}
+  <div class="row mt-4">
+    <div class="col-12">
+      <nav aria-label="Navegación de productos">
+        <ul class="pagination justify-content-center">
+          {{#if pagination.hasPrevPage}}
+            <li class="page-item">
+              <a class="page-link" href="{{pagination.prevLink}}">
+                <i class="bi bi-chevron-left"></i> Anterior
+              </a>
+            </li>
+          {{/if}}
+          
+          <!-- Páginas alrededor de la actual -->
+          {{#each (range (max 1 (sub pagination.page 2)) (min pagination.totalPages (add pagination.page 2)))}}
+            {{#if (eq this ../pagination.page)}}
+              <li class="page-item active">
+                <span class="page-link">{{this}}</span>
+              </li>
+            {{else}}
+              <li class="page-item">
+                <a class="page-link" href="/products?page={{this}}&limit={{../pagination.limit}}{{#if ../filters.query}}&query={{../filters.query}}{{/if}}{{#if ../filters.category}}&category={{../filters.category}}{{/if}}{{#if ../filters.status}}&status={{../filters.status}}{{/if}}{{#if ../filters.sort}}&sort={{../filters.sort}}{{/if}}">{{this}}</a>
+              </li>
+            {{/if}}
+          {{/each}}
+          
+          {{#if pagination.hasNextPage}}
+            <li class="page-item">
+              <a class="page-link" href="{{pagination.nextLink}}">
+                Siguiente <i class="bi bi-chevron-right"></i>
+              </a>
+            </li>
+          {{/if}}
+        </ul>
+      </nav>
+      
+      <div class="text-center text-muted">
+        Página {{pagination.page}} de {{pagination.totalPages}} 
+        ({{pagination.totalDocs}} productos en total)
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>
+
+<!-- Modal para seleccionar carrito -->
+<div class="modal fade" id="cartSelectionModal" tabindex="-1" aria-labelledby="cartSelectionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cartSelectionModalLabel">Agregar al carrito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Producto: <strong id="selectedProductName"></strong></p>
+        <p>Cantidad: <strong id="selectedQuantity"></strong></p>
+        
+        <div class="mb-3">
+          <label for="cartId" class="form-label">ID del carrito:</label>
+          <input type="text" class="form-control" id="cartId" placeholder="Ingresa el ID del carrito">
+          <div class="form-text">Si no tienes un carrito, se creará uno nuevo automáticamente.</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="confirmAddToCart">Agregar al carrito</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.card {
+  transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.add-to-cart-btn:hover {
+  transform: scale(1.05);
+}
+
+.quantity-input {
+  max-width: 80px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  let selectedProductId = null;
+  let selectedQuantity = null;
+  let selectedProductName = null;
+
+  // Manejar botones "Agregar al carrito"
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      selectedProductId = this.dataset.productId;
+      selectedProductName = this.dataset.productTitle;
+      
+      const quantityInput = document.querySelector(`input[data-product-id="${selectedProductId}"]`);
+      selectedQuantity = quantityInput.value;
+      
+      // Actualizar modal
+      document.getElementById('selectedProductName').textContent = selectedProductName;
+      document.getElementById('selectedQuantity').textContent = selectedQuantity;
+      
+      // Mostrar modal
+      const modal = new bootstrap.Modal(document.getElementById('cartSelectionModal'));
+      modal.show();
+    });
+  });
+
+  // Confirmar agregar al carrito
+  document.getElementById('confirmAddToCart').addEventListener('click', async function() {
+    const cartId = document.getElementById('cartId').value.trim();
+    
+    if (!cartId) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'ID de carrito requerido',
+        text: 'Por favor ingresa un ID de carrito válido',
+        confirmButtonColor: '#ffc107'
+      });
+      return;
+    }
+
+    // Mostrar loading
+    Swal.fire({
+      title: 'Agregando al carrito...',
+      text: 'Por favor espera',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading()
+      }
+    });
+
+    try {
+      const response = await fetch(`/api/carts/${cartId}/products/${selectedProductId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          quantity: parseInt(selectedQuantity)
+        })
+      });
+
+      if (response.ok) {
+        await Swal.fire({
+          icon: 'success',
+          title: '¡Producto agregado!',
+          text: 'El producto se agregó al carrito exitosamente',
+          confirmButtonColor: '#28a745'
+        });
+        
+        // Cerrar modal
+        const modal = bootstrap.Modal.getInstance(document.getElementById('cartSelectionModal'));
+        modal.hide();
+        
+        // Limpiar form
+        document.getElementById('cartId').value = '';
+        
+      } else {
+        const error = await response.json();
+        await Swal.fire({
+          icon: 'error',
+          title: 'Error al agregar',
+          text: error.error || 'No se pudo agregar el producto',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error de conexión',
+        text: 'No se pudo conectar con el servidor',
+        confirmButtonColor: '#dc3545'
+      });
+    }
+  });
+
+  // Auto-submit del formulario al cambiar filtros
+  document.getElementById('filterForm').addEventListener('change', function() {
+    // Resetear página al cambiar filtros
+    const pageInput = document.querySelector('input[name="page"]');
+    if (pageInput) {
+      pageInput.value = '1';
+    }
+  });
+});
+</script>

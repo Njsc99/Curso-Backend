@@ -1,35 +1,520 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Productos en tiempo real</title>
-  <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-  <h1>Productos en tiempo real</h1>
-  <ul id="product-list">
-    {{#each products}}
-      <li>{{this.title}} - {{this.price}} <button onclick="deleteProduct('{{this.id}}')">Eliminar</button></li>
-    {{/each}}
-  </ul>
+<div class="container-fluid mt-4">
+  <!-- Encabezado -->
+  <div class="row mb-4">
+    <div class="col-12 text-center">
+      <h1 class="display-4">
+        <i class="bi bi-lightning text-warning"></i>
+        Productos en Tiempo Real
+      </h1>
+      <p class="lead text-muted">
+        Los productos se actualizan automáticamente usando WebSockets
+      </p>
+      
+      <!-- Indicador de conexión -->
+      <div class="alert alert-info d-inline-flex align-items-center" id="connectionStatus">
+        <div class="spinner-border spinner-border-sm me-2" role="status">
+          <span class="visually-hidden">Conectando...</span>
+        </div>
+        Conectando al servidor...
+      </div>
+    </div>
+  </div>
 
-  <h2>Agregar producto</h2>
-  <form id="add-product-form">
-    <input type="text" name="title" placeholder="Nombre" required />
-    <input type="text" name="description" placeholder="Descripción" required />
-    <input type="text" name="code" placeholder="Código" required />
-    <input type="number" name="price" placeholder="Precio" required />
-    <input type="text" name="category" placeholder="Categoría" required />
-    <input type="number" name="stock" placeholder="Stock" required />
-    <select name="status" required>
-      <option value="true">Activo</option>
-      <option value="false">Inactivo</option>
-    </select>
-    <button type="submit">Agregar</button>
-  </form>
+  <div class="row">
+    <!-- Lista de productos (lado izquierdo) -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="mb-0">
+            <i class="bi bi-list"></i> 
+            Lista de Productos 
+            <span class="badge bg-primary ms-2" id="productCount">{{products.length}}</span>
+          </h5>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-success btn-sm" id="refreshBtn">
+              <i class="bi bi-arrow-clockwise"></i> Actualizar
+            </button>
+            <button class="btn btn-outline-danger btn-sm" onclick="clearProducts()">
+              <i class="bi bi-trash"></i> Limpiar vista
+            </button>
+          </div>
+        </div>
+        <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+          <div id="product-list">
+            {{#each products}}
+            <div class="product-item border-bottom pb-3 mb-3" data-product-id="{{id}}">
+              <div class="row align-items-center">
+                <div class="col-md-2">
+                  {{#if thumbnails.length}}
+                  <img src="{{thumbnails.[0]}}" class="img-fluid rounded" alt="{{title}}" style="height: 60px; object-fit: cover;">
+                  {{else}}
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 60px; width: 60px;">
+                    <i class="bi bi-image text-muted"></i>
+                  </div>
+                  {{/if}}
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-1">{{title}}</h6>
+                  <p class="text-muted small mb-1">{{description}}</p>
+                  <div class="d-flex gap-3 small text-muted">
+                    <span><strong>Código:</strong> {{code}}</span>
+                    <span><strong>Categoría:</strong> {{category}}</span>
+                  </div>
+                </div>
+                <div class="col-md-2 text-center">
+                  <span class="h5 text-primary">${{price}}</span>
+                  <br>
+                  <small class="text-muted">Stock: {{stock}}</small>
+                </div>
+                <div class="col-md-1 text-center">
+                  {{#if status}}
+                    <span class="badge bg-success">Activo</span>
+                  {{else}}
+                    <span class="badge bg-secondary">Inactivo</span>
+                  {{/if}}
+                </div>
+                <div class="col-md-1 text-center">
+                  <button onclick="deleteProduct('{{id}}')" class="btn btn-outline-danger btn-sm delete-btn" title="Eliminar producto">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {{/each}}
+          </div>
+          
+          <!-- Mensaje cuando no hay productos -->
+          <div id="emptyMessage" class="text-center py-5 {{#if products.length}}d-none{{/if}}">
+            <i class="bi bi-inbox text-muted" style="font-size: 4rem;"></i>
+            <h4 class="text-muted mt-3">No hay productos</h4>
+            <p class="text-muted">Agrega algunos productos para verlos en tiempo real</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/js/realtimeProducts.js"></script>
-</body>
-</html>
+    <!-- Formulario para agregar productos (lado derecho) -->
+    <div class="col-lg-4">
+      <div class="card sticky-top" style="top: 90px;">
+        <div class="card-header">
+          <h5 class="mb-0">
+            <i class="bi bi-plus-circle"></i> Agregar Producto
+          </h5>
+        </div>
+        <div class="card-body">
+          <form id="add-product-form">
+            <div class="mb-3">
+              <label for="title" class="form-label">Nombre del producto *</label>
+              <input type="text" class="form-control" name="title" id="title" placeholder="Ej: iPhone 14 Pro" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="description" class="form-label">Descripción *</label>
+              <textarea class="form-control" name="description" id="description" rows="3" placeholder="Describe las características del producto..." required></textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="code" class="form-label">Código único *</label>
+                <input type="text" class="form-control" name="code" id="code" placeholder="PRD-001" required>
+              </div>
+              <div class="col-6">
+                <label for="price" class="form-label">Precio *</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input type="number" class="form-control" name="price" id="price" placeholder="99.99" step="0.01" min="0" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="category" class="form-label">Categoría *</label>
+                <input type="text" class="form-control" name="category" id="category" placeholder="Electrónicos" required>
+              </div>
+              <div class="col-6">
+                <label for="stock" class="form-label">Stock *</label>
+                <input type="number" class="form-control" name="stock" id="stock" placeholder="10" min="0" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="status" class="form-label">Estado</label>
+              <select class="form-select" name="status" id="status" required>
+                <option value="true" selected>Activo</option>
+                <option value="false">Inactivo</option>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="thumbnails" class="form-label">URLs de imágenes (opcional)</label>
+              <textarea class="form-control" name="thumbnails" id="thumbnails" rows="2" placeholder="https://ejemplo.com/imagen1.jpg&#10;https://ejemplo.com/imagen2.jpg"></textarea>
+              <div class="form-text">Una URL por línea</div>
+            </div>
+
+            <div class="d-grid">
+              <button type="submit" class="btn btn-success" id="addProductBtn">
+                <i class="bi bi-plus-circle"></i> Agregar Producto
+              </button>
+            </div>
+          </form>
+          
+          <!-- Información adicional -->
+          <div class="mt-4 p-3 bg-light rounded">
+            <h6 class="text-muted">
+              <i class="bi bi-info-circle"></i> Información
+            </h6>
+            <ul class="small text-muted mb-0">
+              <li>Los productos se agregan en tiempo real</li>
+              <li>Todos los usuarios verán los cambios instantáneamente</li>
+              <li>Los campos marcados con * son obligatorios</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="successToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-check-circle-fill text-success me-2"></i>
+        <strong class="me-auto">Éxito</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="successMessage">
+        Producto agregado correctamente
+      </div>
+    </div>
+
+    <div id="errorToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+        <strong class="me-auto">Error</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="errorMessage">
+        Error al agregar el producto
+      </div>
+    </div>
+
+    <div id="infoToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <i class="bi bi-info-circle-fill text-info me-2"></i>
+        <strong class="me-auto">Información</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="infoMessage">
+        Producto eliminado
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.product-item {
+  transition: all 0.3s ease;
+}
+
+.product-item:hover {
+  background-color: #f8f9fa;
+  transform: translateX(5px);
+}
+
+.delete-btn {
+  transition: all 0.3s ease;
+}
+
+.delete-btn:hover {
+  transform: scale(1.1);
+}
+
+#connectionStatus.connected {
+  background-color: #d1e7dd !important;
+  border-color: #badbcc !important;
+  color: #0f5132 !important;
+}
+
+#connectionStatus.disconnected {
+  background-color: #f8d7da !important;
+  border-color: #f5c2c7 !important;
+  color: #842029 !important;
+}
+
+.sticky-top {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+.animate-add {
+  animation: slideInRight 0.5s ease;
+}
+
+.animate-remove {
+  animation: slideOutLeft 0.5s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutLeft {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+}
+</style>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Inicializar Socket.io
+  const socket = io();
+
+  // Referencias a elementos
+  const connectionStatus = document.getElementById('connectionStatus');
+  const productList = document.getElementById('product-list');
+  const emptyMessage = document.getElementById('emptyMessage');
+  const productCount = document.getElementById('productCount');
+  const addProductForm = document.getElementById('add-product-form');
+  const addProductBtn = document.getElementById('addProductBtn');
+
+  // Toasts
+  const successToast = new bootstrap.Toast(document.getElementById('successToast'));
+  const errorToast = new bootstrap.Toast(document.getElementById('errorToast'));
+  const infoToast = new bootstrap.Toast(document.getElementById('infoToast'));
+
+  // Estado de conexión
+  socket.on('connect', () => {
+    connectionStatus.className = 'alert alert-success d-inline-flex align-items-center connected';
+    connectionStatus.innerHTML = '<i class="bi bi-check-circle me-2"></i>Conectado al servidor';
+  });
+
+  socket.on('disconnect', () => {
+    connectionStatus.className = 'alert alert-danger d-inline-flex align-items-center disconnected';
+    connectionStatus.innerHTML = '<i class="bi bi-x-circle me-2"></i>Desconectado del servidor';
+  });
+
+  // Escuchar eventos de productos
+  socket.on('productAdded', (product) => {
+    addProductToDOM(product);
+    showToast('success', `Producto "${product.title}" agregado correctamente`);
+    updateProductCount();
+  });
+
+  socket.on('productDeleted', (productId) => {
+    removeProductFromDOM(productId);
+    showToast('info', 'Producto eliminado correctamente');
+    updateProductCount();
+  });
+
+  // Agregar producto al DOM
+  function addProductToDOM(product) {
+    const productElement = createProductElement(product);
+    productList.appendChild(productElement);
+    
+    // Animación de entrada
+    setTimeout(() => {
+      productElement.classList.add('animate-add');
+    }, 10);
+    
+    // Ocultar mensaje vacío
+    emptyMessage.classList.add('d-none');
+  }
+
+  // Remover producto del DOM
+  function removeProductFromDOM(productId) {
+    const productElement = document.querySelector(`[data-product-id="${productId}"]`);
+    if (productElement) {
+      productElement.classList.add('animate-remove');
+      setTimeout(() => {
+        productElement.remove();
+        // Mostrar mensaje vacío si no hay productos
+        if (productList.children.length === 0) {
+          emptyMessage.classList.remove('d-none');
+        }
+      }, 500);
+    }
+  }
+
+  // Crear elemento de producto
+  function createProductElement(product) {
+    const div = document.createElement('div');
+    div.className = 'product-item border-bottom pb-3 mb-3';
+    div.setAttribute('data-product-id', product.id);
+    
+    div.innerHTML = `
+      <div class="row align-items-center">
+        <div class="col-md-2">
+          ${product.thumbnails && product.thumbnails.length > 0 ? 
+            `<img src="${product.thumbnails[0]}" class="img-fluid rounded" alt="${product.title}" style="height: 60px; object-fit: cover;">` :
+            `<div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 60px; width: 60px;">
+              <i class="bi bi-image text-muted"></i>
+            </div>`
+          }
+        </div>
+        <div class="col-md-6">
+          <h6 class="mb-1">${product.title}</h6>
+          <p class="text-muted small mb-1">${product.description}</p>
+          <div class="d-flex gap-3 small text-muted">
+            <span><strong>Código:</strong> ${product.code}</span>
+            <span><strong>Categoría:</strong> ${product.category}</span>
+          </div>
+        </div>
+        <div class="col-md-2 text-center">
+          <span class="h5 text-primary">$${product.price}</span>
+          <br>
+          <small class="text-muted">Stock: ${product.stock}</small>
+        </div>
+        <div class="col-md-1 text-center">
+          <span class="badge ${product.status ? 'bg-success' : 'bg-secondary'}">
+            ${product.status ? 'Activo' : 'Inactivo'}
+          </span>
+        </div>
+        <div class="col-md-1 text-center">
+          <button onclick="deleteProduct('${product.id}')" class="btn btn-outline-danger btn-sm delete-btn" title="Eliminar producto">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    
+    return div;
+  }
+
+  // Actualizar contador de productos
+  function updateProductCount() {
+    const count = productList.children.length;
+    productCount.textContent = count;
+  }
+
+  // Mostrar notificaciones simples
+  function showToast(type, message) {
+    Swal.fire({
+      icon: type,
+      title: message,
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    });
+  }
+
+  // Manejar envío del formulario
+  addProductForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Deshabilitar botón
+    addProductBtn.disabled = true;
+    addProductBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Agregando...';
+    
+    const formData = new FormData(addProductForm);
+    const productData = Object.fromEntries(formData);
+    
+    // Procesar thumbnails
+    if (productData.thumbnails) {
+      productData.thumbnails = productData.thumbnails.split('\n')
+        .map(url => url.trim())
+        .filter(url => url.length > 0);
+    } else {
+      productData.thumbnails = [];
+    }
+    
+    // Convertir valores numéricos y booleanos
+    productData.price = parseFloat(productData.price);
+    productData.stock = parseInt(productData.stock);
+    productData.status = productData.status === 'true';
+    
+    try {
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(productData)
+      });
+
+      if (response.ok) {
+        addProductForm.reset();
+      } else {
+        const error = await response.json();
+        showToast('error', error.error || 'Error al agregar el producto');
+      }
+    } catch (error) {
+      showToast('error', 'Error de conexión');
+    } finally {
+      // Rehabilitar botón
+      addProductBtn.disabled = false;
+      addProductBtn.innerHTML = '<i class="bi bi-plus-circle"></i> Agregar Producto';
+    }
+  });
+
+  // Botón refresh
+  document.getElementById('refreshBtn').addEventListener('click', () => {
+    location.reload();
+  });
+
+  // Limpiar vista (función global)
+  window.clearProducts = async function() {
+    const result = await Swal.fire({
+      title: '¿Limpiar vista?',
+      text: 'Solo limpia la visualización',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Limpiar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      productList.innerHTML = '';
+      emptyMessage.classList.remove('d-none');
+      updateProductCount();
+      showToast('success', 'Vista limpiada');
+    }
+  };
+
+  // Eliminar producto (función global)
+  window.deleteProduct = async function(productId) {
+    const result = await Swal.fire({
+      title: '¿Eliminar producto?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Eliminar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#d33'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/products/${productId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showToast('success', 'Producto eliminado');
+        } else {
+          const error = await response.json();
+          showToast('error', error.error || 'Error al eliminar');
+        }
+      } catch (error) {
+        showToast('error', 'Error de conexión');
+      }
+    }
+  };
+});
+</script>

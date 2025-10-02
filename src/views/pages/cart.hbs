@@ -1,0 +1,564 @@
+{{#if error}}
+<div class="container mt-4">
+  <div class="alert alert-danger" role="alert">
+    <i class="bi bi-exclamation-triangle"></i> {{error}}
+  </div>
+  <div class="text-center">
+    <a href="/produc            <div class="d-grid gap-2">
+              <button class="btn btn-outline-secondary" id="saveForLaterBtn">
+                <i class="bi bi-bookmark"></i> Guardar para después
+              </button>
+            </div>s="btn btn-primary">
+      <i class="bi bi-arrow-left"></i> Ir al catálogo
+    </a>
+  </div>
+</div>
+{{else}}
+{{#if cart}}
+<div class="container mt-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+      <li class="breadcrumb-item"><a href="/products">Productos</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Carrito {{cart.id}}</li>
+    </ol>
+  </nav>
+
+  <!-- Encabezado del carrito -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <h1 class="display-5">
+        <i class="bi bi-cart3"></i> Mi Carrito
+      </h1>
+      <p class="lead text-muted">ID del carrito: <code>{{cart.id}}</code></p>
+    </div>
+  </div>
+
+  {{#if cart.products.length}}
+    <!-- Resumen del carrito -->
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="card bg-light">
+          <div class="card-body">
+            <div class="row text-center">
+              <div class="col-md-4">
+                <h5 class="card-title text-primary">{{totals.totalItems}}</h5>
+                <p class="card-text">
+                  {{#if (eq totals.totalItems 1)}}
+                    Producto
+                  {{else}}
+                    Productos
+                  {{/if}}
+                </p>
+              </div>
+              <div class="col-md-8">
+                <h5 class="card-title text-success">${{totals.totalPrice}}</h5>
+                <p class="card-text">Total</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="row">
+      <div class="col-lg-8">
+        <h4 class="mb-3">Productos en tu carrito</h4>
+        
+        {{#each cart.products}}
+        <div class="card mb-3 product-card" data-product-id="{{product.id}}">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <!-- Imagen del producto -->
+              <div class="col-md-2">
+                {{#if (hasItems product.thumbnails)}}
+                  <img src="{{first product.thumbnails}}" 
+                       class="img-fluid rounded" 
+                       alt="{{product.title}}"
+                       style="height: 80px; object-fit: cover;">
+                {{else}}
+                  <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 80px; width: 80px;">
+                    <i class="bi bi-image text-muted"></i>
+                  </div>
+                {{/if}}
+              </div>
+              
+              <!-- Información del producto -->
+              <div class="col-md-4">
+                <h6 class="card-title mb-1">
+                  <a href="/products/{{product.id}}" class="text-decoration-none">
+                    {{product.title}}
+                  </a>
+                </h6>
+                <p class="text-muted small mb-1">{{product.category}}</p>
+                <p class="small mb-0">Código: {{product.code}}</p>
+                
+                <!-- Estado del producto -->
+                {{#if product.status}}
+                  {{#if (gt product.stock 0)}}
+                    <span class="badge bg-success small">Disponible</span>
+                  {{else}}
+                    <span class="badge bg-warning small">Sin stock</span>
+                  {{/if}}
+                {{else}}
+                  <span class="badge bg-danger small">No disponible</span>
+                {{/if}}
+              </div>
+              
+              <!-- Precio unitario -->
+              <div class="col-md-2 text-center">
+                <p class="mb-0"><strong>${{product.price}}</strong></p>
+                <small class="text-muted">c/u</small>
+              </div>
+              
+              <!-- Cantidad -->
+              <div class="col-md-2">
+                <div class="quantity-controls">
+                  <label class="form-label small">Cantidad:</label>
+                  <div class="input-group input-group-sm">
+                    <button class="btn btn-outline-secondary decrease-qty" 
+                            type="button"
+                            data-product-id="{{product.id}}"
+                            {{#if (eq quantity 1)}}disabled{{/if}}>
+                      <i class="bi bi-dash"></i>
+                    </button>
+                    <input type="number" 
+                           class="form-control text-center quantity-input" 
+                           value="{{quantity}}" 
+                           min="1"
+                           max="{{product.stock}}"
+                           data-product-id="{{product.id}}"
+                           data-price="{{product.price}}">
+                    <button class="btn btn-outline-secondary increase-qty" 
+                            type="button"
+                            data-product-id="{{product.id}}"
+                            {{#if (eq quantity product.stock)}}disabled{{/if}}>
+                      <i class="bi bi-plus"></i>
+                    </button>
+                  </div>
+                  <small class="text-muted">Stock: {{product.stock}}</small>
+                </div>
+              </div>
+              
+              <!-- Total del producto -->
+              <div class="col-md-1 text-center">
+                <p class="mb-0 item-total" data-price="{{product.price}}" data-quantity="{{quantity}}">
+                  <strong>${{multiply product.price quantity}}</strong>
+                </p>
+              </div>
+              
+              <!-- Acciones -->
+              <div class="col-md-1 text-center">
+                <button class="btn btn-outline-danger btn-sm remove-item" 
+                        data-product-id="{{product.id}}"
+                        data-product-title="{{product.title}}"
+                        title="Eliminar del carrito">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{/each}}
+        
+        <!-- Acciones del carrito -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <button class="btn btn-outline-warning me-2" id="clearCartBtn">
+                  <i class="bi bi-trash"></i> Vaciar carrito
+                </button>
+                <a href="/products" class="btn btn-outline-primary">
+                  <i class="bi bi-plus-circle"></i> Seguir comprando
+                </a>
+              </div>
+              <div class="col-md-6 text-end">
+                <!-- Botones adicionales removidos -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar con resumen -->
+      <div class="col-lg-4">
+        <div class="card sticky-top" style="top: 20px;">
+          <div class="card-header">
+            <h5 class="mb-0">Resumen del pedido</h5>
+          </div>
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+              <span>Subtotal:</span>
+              <span id="subtotalAmount">${{totals.totalPrice}}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Envío:</span>
+              <span class="text-success">Gratis</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+              <span>Descuentos:</span>
+              <span class="text-success">-$0.00</span>
+            </div>
+            <hr>
+            <div class="d-flex justify-content-between mb-3">
+              <strong>Total:</strong>
+              <strong class="text-success" id="totalAmount">${{totals.totalPrice}}</strong>
+            </div>
+            
+            <div class="d-grid gap-2">
+              <button class="btn btn-outline-secondary" id="saveForLaterBtn">
+                <i class="bi bi-bookmark"></i> Guardar para después
+              </button>
+            </div>
+            
+            <!-- Información adicional -->
+            <div class="mt-3">
+              <small class="text-muted">
+                <i class="bi bi-shield-check text-success"></i>
+                Compra segura y protegida
+              </small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  {{else}}
+    <!-- Carrito vacío -->
+    <div class="text-center py-5">
+      <i class="bi bi-cart-x text-muted" style="font-size: 5rem;"></i>
+      <h3 class="mt-3 text-muted">Tu carrito está vacío</h3>
+      <p class="text-muted">Agrega algunos productos para comenzar tu compra</p>
+      <a href="/products" class="btn btn-primary btn-lg mt-3">
+        <i class="bi bi-shop"></i> Explorar productos
+      </a>
+    </div>
+  {{/if}}
+</div>
+
+
+
+<!-- Modal de confirmación para vaciar carrito -->
+<div class="modal fade" id="clearCartModal" tabindex="-1" aria-labelledby="clearCartModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="clearCartModalLabel">Vaciar carrito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Estás seguro que deseas eliminar todos los productos del carrito?</p>
+        <p class="text-muted">Esta acción no se puede deshacer.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-danger" id="confirmClearCart">
+          <i class="bi bi-trash"></i> Vaciar carrito
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.product-card {
+  transition: all 0.3s ease;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.quantity-controls .btn {
+  transition: all 0.2s ease;
+}
+
+.quantity-controls .btn:hover {
+  transform: scale(1.1);
+}
+
+.sticky-top {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+@media print {
+  .btn, 
+  .modal,
+  .sticky-top .card-body .d-grid,
+  nav {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .quantity-controls {
+    margin-top: 10px;
+  }
+  
+  .product-card .row > div {
+    margin-bottom: 10px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const cartId = '{{cart.id}}';
+  let selectedProductId = null;
+  let selectedProductTitle = null;
+
+  // Actualizar totales
+  function updateTotals() {
+    let totalItems = 0;
+    let totalPrice = 0;
+    
+    document.querySelectorAll('.quantity-input').forEach(input => {
+      const quantity = parseInt(input.value);
+      const price = parseFloat(input.dataset.price);
+      
+      totalItems += quantity;
+      totalPrice += quantity * price;
+      
+      // Actualizar total del producto individual
+      const itemTotal = input.closest('.product-card').querySelector('.item-total');
+      itemTotal.innerHTML = `<strong>$${(quantity * price).toFixed(2)}</strong>`;
+    });
+    
+    // Actualizar totales en la interfaz
+    document.getElementById('subtotalAmount').textContent = `$${totalPrice.toFixed(2)}`;
+    document.getElementById('totalAmount').textContent = `$${totalPrice.toFixed(2)}`;
+  }
+
+  // Manejar cambios de cantidad
+  document.querySelectorAll('.quantity-input').forEach(input => {
+    input.addEventListener('change', async function() {
+      const productId = this.dataset.productId;
+      const newQuantity = parseInt(this.value);
+      const maxStock = parseInt(this.getAttribute('max'));
+      
+      if (newQuantity < 1) {
+        this.value = 1;
+        return;
+      }
+      
+      if (newQuantity > maxStock) {
+        this.value = maxStock;
+        alert(`Stock máximo disponible: ${maxStock}`);
+        return;
+      }
+      
+      await updateCartQuantity(productId, newQuantity);
+    });
+  });
+
+  // Botones de incrementar/decrementar
+  document.querySelectorAll('.increase-qty').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const productId = this.dataset.productId;
+      const input = document.querySelector(`input[data-product-id="${productId}"]`);
+      const currentValue = parseInt(input.value);
+      const maxValue = parseInt(input.getAttribute('max'));
+      
+      if (currentValue < maxValue) {
+        input.value = currentValue + 1;
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+  });
+
+  document.querySelectorAll('.decrease-qty').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const productId = this.dataset.productId;
+      const input = document.querySelector(`input[data-product-id="${productId}"]`);
+      const currentValue = parseInt(input.value);
+      
+      if (currentValue > 1) {
+        input.value = currentValue - 1;
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+  });
+
+  // Función para actualizar cantidad en el carrito
+  async function updateCartQuantity(productId, quantity) {
+    try {
+      const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity })
+      });
+
+      if (response.ok) {
+        updateTotals();
+        // Actualizar botones de incrementar/decrementar
+        updateQuantityButtons(productId, quantity);
+      } else {
+        const error = await response.json();
+        alert('Error al actualizar cantidad: ' + (error.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión');
+    }
+  }
+
+  // Actualizar estado de botones según cantidad
+  function updateQuantityButtons(productId, quantity) {
+    const decreaseBtn = document.querySelector(`.decrease-qty[data-product-id="${productId}"]`);
+    const increaseBtn = document.querySelector(`.increase-qty[data-product-id="${productId}"]`);
+    const input = document.querySelector(`input[data-product-id="${productId}"]`);
+    
+    if (decreaseBtn) {
+      decreaseBtn.disabled = quantity <= 1;
+    }
+    
+    if (increaseBtn && input) {
+      const maxStock = parseInt(input.getAttribute('max'));
+      increaseBtn.disabled = quantity >= maxStock;
+    }
+  }
+
+  // Manejar eliminación de productos
+  document.querySelectorAll('.remove-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+      selectedProductId = this.dataset.productId;
+      selectedProductTitle = this.dataset.productTitle;
+      
+      Swal.fire({
+        title: '¿Quitar del carrito?',
+        text: `¿Estás seguro que quieres quitar ${selectedProductTitle}?`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Sí, quitar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          eliminarProducto();
+        }
+      });
+    });
+  });
+
+  // Confirmar eliminación de producto
+  // Función para eliminar producto
+  async function eliminarProducto() {
+    try {
+      Swal.fire({
+        title: 'Quitando producto...',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      const response = await fetch(`/api/carts/${cartId}/products/${selectedProductId}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        // Remover del DOM
+        const productCard = document.querySelector(`[data-product-id="${selectedProductId}"]`);
+        if (productCard) productCard.remove();
+        
+        updateTotals();
+
+        Swal.fire({
+          icon: 'success',
+          title: '¡Listo!',
+          text: 'Producto quitado del carrito',
+          timer: 1500,
+          showConfirmButton: false
+        });
+        
+        // Si no hay más productos, recargar
+        if (document.querySelectorAll('.product-card').length === 0) {
+          setTimeout(() => location.reload(), 1500);
+        }
+      } else {
+        const error = await response.json();
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: error.error || 'No pudimos quitar el producto',
+          confirmButtonText: 'Entendido'
+        });
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Sin conexión',
+        text: 'Verifica tu conexión a internet e intenta nuevamente',
+        confirmButtonText: 'Reintentar',
+        showCancelButton: true,
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) eliminarProducto();
+      });
+    }
+  }
+
+  // Vaciar carrito
+  document.getElementById('clearCartBtn').addEventListener('click', function() {
+    const modal = new bootstrap.Modal(document.getElementById('clearCartModal'));
+    modal.show();
+  });
+
+  document.getElementById('confirmClearCart').addEventListener('click', async function() {
+    try {
+      const response = await fetch(`/api/carts/${cartId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        location.reload();
+      } else {
+        const error = await response.json();
+        alert('Error al vaciar carrito: ' + (error.error || 'Error desconocido'));
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error de conexión');
+    }
+  });
+
+  // Guardar para después
+  document.getElementById('saveForLaterBtn').addEventListener('click', function() {
+    Swal.fire({
+      icon: 'success',
+      title: '¡Guardado! 💾',
+      text: 'Tu carrito está guardado para cuando vuelvas',
+      timer: 2000,
+      showConfirmButton: false
+    });
+  });
+
+  // Inicializar totales
+  updateTotals();
+});
+
+// Helper para multiplicar en Handlebars (se define globalmente)
+if (typeof Handlebars !== 'undefined') {
+  Handlebars.registerHelper('multiply', function(a, b) {
+    return (a * b).toFixed(2);
+  });
+  
+  Handlebars.registerHelper('eq', function(a, b) {
+    return a === b;
+  });
+  
+  Handlebars.registerHelper('gt', function(a, b) {
+    return a > b;
+  });
+}
+</script>
+
+{{/if}}
+{{/if}}

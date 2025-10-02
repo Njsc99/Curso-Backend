@@ -1,0 +1,460 @@
+{{#if error}}
+<div class="alert alert-danger" role="alert">
+  <i class="bi bi-exclamation-triangle"></i> {{error}}
+</div>
+<div class="text-center mt-4">
+  <a href="/products" class="btn btn-primary">
+    <i class="bi bi-arrow-left"></i> Volver al catálogo
+  </a>
+</div>
+{{else}}
+{{#if product}}
+<div class="container mt-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+      <li class="breadcrumb-item"><a href="/products">Productos</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{product.title}}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Imágenes del producto -->
+    <div class="col-md-6">
+      <div class="product-images">
+        {{#if (hasItems product.thumbnails)}}
+          <!-- Imagen principal -->
+          <div class="main-image mb-3">
+            <img id="mainProductImage" 
+                 src="{{first product.thumbnails}}" 
+                 class="img-fluid rounded shadow" 
+                 alt="{{product.title}}"
+                 style="width: 100%; height: 400px; object-fit: cover;">
+          </div>
+          
+          <!-- Miniaturas -->
+          {{#if (gt product.thumbnails.length 1)}}
+          <div class="thumbnail-images">
+            <div class="row">
+              {{#each product.thumbnails}}
+              <div class="col-3 mb-2">
+                <img src="{{this}}" 
+                     class="img-thumbnail thumbnail-selector" 
+                     alt="Vista {{@index}}"
+                     style="height: 80px; object-fit: cover; cursor: pointer;"
+                     data-full-image="{{this}}">
+              </div>
+              {{/each}}
+            </div>
+          </div>
+          {{/if}}
+        {{else}}
+          <!-- Imagen placeholder -->
+          <div class="main-image bg-light rounded d-flex align-items-center justify-content-center" style="height: 400px;">
+            <div class="text-center text-muted">
+              <i class="bi bi-image" style="font-size: 4rem;"></i>
+              <p class="mt-2">Sin imagen disponible</p>
+            </div>
+          </div>
+        {{/if}}
+      </div>
+    </div>
+
+    <!-- Información del producto -->
+    <div class="col-md-6">
+      <div class="product-info">
+        <!-- Título y categoría -->
+        <h1 class="display-5 mb-2">{{product.title}}</h1>
+        <p class="text-muted mb-3">
+          <i class="bi bi-tag"></i> Categoría: 
+          <span class="badge bg-secondary">{{product.category}}</span>
+        </p>
+
+        <!-- Precio -->
+        <div class="price-section mb-4">
+          <span class="h2 text-primary">${{product.price}}</span>
+          <small class="text-muted ms-2">USD</small>
+        </div>
+
+        <!-- Estado y stock -->
+        <div class="status-section mb-4">
+          <div class="row">
+            <div class="col-6">
+              <strong>Estado:</strong>
+              {{#if product.status}}
+                <span class="badge bg-success ms-2">
+                  <i class="bi bi-check-circle"></i> Disponible
+                </span>
+              {{else}}
+                <span class="badge bg-danger ms-2">
+                  <i class="bi bi-x-circle"></i> No disponible
+                </span>
+              {{/if}}
+            </div>
+            <div class="col-6">
+              <strong>Stock:</strong>
+              <span class="ms-2">
+                {{#if (gt product.stock 0)}}
+                  <span class="text-success">{{product.stock}} unidades</span>
+                {{else}}
+                  <span class="text-danger">Sin stock</span>
+                {{/if}}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Código del producto -->
+        <div class="code-section mb-4">
+          <small class="text-muted">
+            <strong>Código:</strong> {{product.code}}
+          </small>
+        </div>
+
+        <!-- Descripción -->
+        <div class="description-section mb-4">
+          <h5>Descripción del producto</h5>
+          <p class="lead">{{product.description}}</p>
+        </div>
+
+        <!-- Acciones del producto -->
+        <div class="actions-section">
+          {{#if product.status}}
+            {{#if (gt product.stock 0)}}
+              <!-- Selección de cantidad -->
+              <div class="quantity-section mb-3">
+                <label for="quantity" class="form-label"><strong>Cantidad:</strong></label>
+                <div class="input-group" style="max-width: 200px;">
+                  <button class="btn btn-outline-secondary" type="button" id="decreaseBtn">
+                    <i class="bi bi-dash"></i>
+                  </button>
+                  <input type="number" 
+                         class="form-control text-center" 
+                         id="quantity" 
+                         value="1" 
+                         min="1" 
+                         max="{{product.stock}}"
+                         readonly>
+                  <button class="btn btn-outline-secondary" type="button" id="increaseBtn">
+                    <i class="bi bi-plus"></i>
+                  </button>
+                </div>
+                <small class="form-text text-muted">Máximo: {{product.stock}} unidades</small>
+              </div>
+
+              <!-- Botón agregar al carrito -->
+              <div class="d-grid">
+                <button class="btn btn-success btn-lg" 
+                        id="addToCartBtn"
+                        data-product-id="{{product.id}}"
+                        data-product-title="{{product.title}}">
+                  <i class="bi bi-cart-plus"></i> Agregar al carrito
+                </button>
+              </div>
+            {{else}}
+              <!-- Sin stock -->
+              <div class="alert alert-warning" role="alert">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>Producto sin stock</strong><br>
+                Este producto no está disponible en este momento.
+              </div>
+            {{/if}}
+          {{else}}
+            <!-- Producto no disponible -->
+            <div class="alert alert-danger" role="alert">
+              <i class="bi bi-x-octagon"></i>
+              <strong>Producto no disponible</strong><br>
+              Este producto no está activo en nuestro catálogo.
+            </div>
+          {{/if}}
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Navegación -->
+  <div class="row mt-5">
+    <div class="col-12">
+      <div class="d-flex justify-content-between">
+        <a href="/products" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left"></i> Volver al catálogo
+        </a>
+        
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para seleccionar carrito -->
+<div class="modal fade" id="cartSelectionModal" tabindex="-1" aria-labelledby="cartSelectionModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cartSelectionModalLabel">Agregar al carrito</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="product-summary p-3 bg-light rounded mb-3">
+          <h6>Producto seleccionado:</h6>
+          <p class="mb-1"><strong>{{product.title}}</strong></p>
+          <p class="mb-1">Precio: <span class="text-primary">${{product.price}}</span></p>
+          <p class="mb-0">Cantidad: <strong id="modalQuantity">1</strong></p>
+          <p class="mb-0">Total: <span class="text-success" id="modalTotal">${{product.price}}</span></p>
+        </div>
+        
+        <div class="mb-3">
+          <label for="cartId" class="form-label">ID del carrito:</label>
+          <input type="text" class="form-control" id="cartId" placeholder="Ingresa el ID del carrito">
+          <div class="form-text">
+            <i class="bi bi-info-circle"></i>
+            Si no tienes un carrito o el ID no existe, se creará uno nuevo automáticamente.
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="confirmAddToCart">
+          <i class="bi bi-cart-plus"></i> Agregar al carrito
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.thumbnail-selector {
+  transition: all 0.3s ease;
+}
+
+.thumbnail-selector:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.thumbnail-selector.active {
+  border-color: #0d6efd;
+  border-width: 3px;
+}
+
+.product-images img {
+  transition: transform 0.3s ease;
+}
+
+.actions-section button {
+  transition: all 0.3s ease;
+}
+
+.actions-section button:hover {
+  transform: translateY(-2px);
+}
+
+@media print {
+  .actions-section,
+  .breadcrumb,
+  nav,
+  .btn {
+    display: none !important;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const productPrice = {{product.price}};
+  let currentQuantity = 1;
+
+  // Manejar selección de imágenes en miniatura
+  document.querySelectorAll('.thumbnail-selector').forEach(img => {
+    img.addEventListener('click', function() {
+      // Remover clase active de todas las miniaturas
+      document.querySelectorAll('.thumbnail-selector').forEach(thumb => {
+        thumb.classList.remove('active');
+      });
+      
+      // Agregar clase active a la seleccionada
+      this.classList.add('active');
+      
+      // Cambiar imagen principal
+      document.getElementById('mainProductImage').src = this.dataset.fullImage;
+    });
+  });
+
+  // Marcar primera imagen como activa
+  const firstThumbnail = document.querySelector('.thumbnail-selector');
+  if (firstThumbnail) {
+    firstThumbnail.classList.add('active');
+  }
+
+  // Manejar botones de cantidad
+  const quantityInput = document.getElementById('quantity');
+  const decreaseBtn = document.getElementById('decreaseBtn');
+  const increaseBtn = document.getElementById('increaseBtn');
+  const maxStock = {{product.stock}};
+
+  if (decreaseBtn && increaseBtn && quantityInput) {
+    decreaseBtn.addEventListener('click', function() {
+      let value = parseInt(quantityInput.value);
+      if (value > 1) {
+        value--;
+        quantityInput.value = value;
+        currentQuantity = value;
+      }
+    });
+
+    increaseBtn.addEventListener('click', function() {
+      let value = parseInt(quantityInput.value);
+      if (value < maxStock) {
+        value++;
+        quantityInput.value = value;
+        currentQuantity = value;
+      }
+    });
+
+    quantityInput.addEventListener('change', function() {
+      let value = parseInt(this.value);
+      if (value < 1) value = 1;
+      if (value > maxStock) value = maxStock;
+      this.value = value;
+      currentQuantity = value;
+    });
+  }
+
+  // Manejar botón "Agregar al carrito"
+  const addToCartBtn = document.getElementById('addToCartBtn');
+  if (addToCartBtn) {
+    addToCartBtn.addEventListener('click', function() {
+      // Actualizar información en el modal
+      document.getElementById('modalQuantity').textContent = currentQuantity;
+      document.getElementById('modalTotal').textContent = '$' + (productPrice * currentQuantity).toFixed(2);
+      
+      // Mostrar modal
+      const modal = new bootstrap.Modal(document.getElementById('cartSelectionModal'));
+      modal.show();
+    });
+  }
+
+  // Confirmar agregar al carrito
+  const confirmBtn = document.getElementById('confirmAddToCart');
+  if (confirmBtn) {
+confirmBtn.addEventListener('click', async function() {
+      // Cerrar el modal de selección primero
+      const modal = bootstrap.Modal.getInstance(document.getElementById('cartSelectionModal'));
+      if (modal) modal.hide();
+
+      // Usar el mismo sistema humanizado que en home
+      const { value: cartId } = await Swal.fire({
+        title: '🛒 ¿Dónde lo agregamos?',
+        text: 'Ingresa tu código de carrito o deja vacío para crear uno nuevo',
+        input: 'text',
+        inputPlaceholder: 'Código de tu carrito (opcional)',
+        showCancelButton: true,
+        confirmButtonText: 'Agregar producto',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        inputValidator: (value) => {
+          if (value && value.length < 10) {
+            return 'El código debe tener al menos 10 caracteres'
+          }
+        }
+      });
+
+      if (cartId === undefined) return; // Usuario canceló
+
+      let targetCartId = cartId;
+
+      // Si no hay carrito, crear uno nuevo
+      if (!targetCartId) {
+        try {
+          const createResponse = await fetch('/api/carts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+          });
+          
+          if (createResponse.ok) {
+            const createResult = await createResponse.json();
+            targetCartId = createResult.payload.id;
+            
+            await Swal.fire({
+              icon: 'success',
+              title: '¡Listo! 🎉',
+              text: `Tu carrito está creado. Código: ${targetCartId}`,
+              confirmButtonColor: '#28a745'
+            });
+          } else {
+            throw new Error('Error al crear carrito');
+          }
+        } catch (error) {
+          await Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: 'No pudimos crear el carrito. Intenta nuevamente.',
+            confirmButtonColor: '#dc3545'
+          });
+          return;
+        }
+      }
+
+      // Mostrar loading
+      Swal.fire({
+        title: 'Agregando...',
+        text: 'Un momentito ✨',
+        allowOutsideClick: false,
+        didOpen: () => Swal.showLoading()
+      });
+
+      try {
+        const response = await fetch(`/api/carts/${targetCartId}/products/{{product.id}}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ quantity: currentQuantity })
+        });
+
+        if (response.ok) {
+          const result = await Swal.fire({
+            icon: 'success',
+            title: '¡Agregado! 🎉',
+            text: `${currentQuantity} unidad${currentQuantity > 1 ? 'es' : ''} en tu carrito`,
+            footer: `Código del carrito: ${targetCartId}`,
+            showCancelButton: true,
+            confirmButtonText: 'Ver mi carrito',
+            cancelButtonText: 'Seguir comprando',
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d'
+          });
+
+          if (result.isConfirmed) {
+            window.location.href = `/carts/${targetCartId}`;
+          }
+        } else {
+          const error = await response.json();
+          await Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.error || 'Algo salió mal, intenta nuevamente',
+            confirmButtonColor: '#dc3545'
+          });
+        }
+      } catch (error) {
+        await Swal.fire({
+          icon: 'error',
+          title: 'Sin conexión',
+          text: 'Revisa tu conexión e intenta nuevamente',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  }
+
+
+});
+
+
+</script>
+
+{{/if}}
+{{/if}}
